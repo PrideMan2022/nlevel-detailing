@@ -1255,6 +1255,16 @@ a.card:hover .card__media img {
   color: var(--accent-ink);
 }
 
+/* Якорные кнопки в прайсе бывают длинными («Защита плёнкой (антигравийная /
+   полиуретан / PPF)»). У .btn стоит white-space: nowrap — на узких экранах
+   такая кнопка вылезала за край и растягивала страницу. Здесь переносим. */
+.filters .btn {
+  white-space: normal;
+  max-inline-size: 100%;
+  text-align: center;
+  line-height: 1.3;
+}
+
 /* ---------- 12. ОТЗЫВЫ ---------- */
 .review {
   display: flex;
