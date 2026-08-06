@@ -1583,6 +1583,8 @@ a.card:hover .card__media img {
 /* ---------- 13b. ВСТРОЕННОЕ ПРИЛОЖЕНИЕ ОНЛАЙН-ЗАПИСИ ---------- */
 .appframe {
   position: relative;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--r-xl);
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1593,10 +1595,11 @@ a.card:hover .card__media img {
 }
 
 .appframe__bar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   background: var(--surface);
   border-block-end: 1px solid var(--line-soft);
   font-size: 0.78rem;
@@ -1628,9 +1631,26 @@ a.card:hover .card__media img {
   text-overflow: ellipsis;
 }
 
+/* Кнопка «открыть в новой вкладке» — только иконка, без текста она
+   схлопывалась до 11px. Задаём явный размер, чтобы в неё можно было попасть. */
+.appframe__bar .chip {
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.appframe__bar .chip svg {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+}
+
 .appframe__body {
   position: relative;
-  block-size: calc(100% - 41px);
+  flex: 1;
+  min-block-size: 0;
 }
 
 .appframe iframe {

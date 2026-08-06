@@ -108,6 +108,13 @@
         });
       }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
       reveals.forEach(function (el) { io.observe(el); });
+
+      // Страховка от невидимого контента: если наблюдатель почему-то
+      // не отработал (фоновая вкладка, старый движок), через 2,5 секунды
+      // показываем всё принудительно. Пустых блоков быть не должно.
+      setTimeout(function () {
+        reveals.forEach(function (el) { el.classList.add('is-in'); });
+      }, 2500);
     } else {
       reveals.forEach(function (el) { el.classList.add('is-in'); });
     }
@@ -252,16 +259,35 @@
     // Приложение подгружается само, как только окно попадает в поле зрения:
     // клик не нужен, никуда не перекидывает. Сборка тяжёлая, поэтому
     // не тянем её тем, кто до этого блока не долистал.
+    var appLoaded = false;
+    var loadAppOnce = function () {
+      if (appLoaded) return;
+      appLoaded = true;
+      loadApp();
+    };
+
     if ('IntersectionObserver' in window) {
       var appIo = new IntersectionObserver(function (entries) {
         if (entries[0].isIntersecting) {
           appIo.disconnect();
-          loadApp();
+          loadAppOnce();
         }
       }, { rootMargin: '200px' });
       appIo.observe(appStub);
+
+      // Подстраховка: в фоновой вкладке наблюдатели молчат, и человек,
+      // вернувшись, увидел бы пустую заглушку. Грузим сами, когда
+      // страница становится видимой и окно уже на нужном месте.
+      var appFallback = function () {
+        if (document.visibilityState !== 'visible') return;
+        var r = appStub.getBoundingClientRect();
+        if (r.top < window.innerHeight + 200 && r.bottom > -200) loadAppOnce();
+      };
+      document.addEventListener('visibilitychange', appFallback);
+      window.addEventListener('scroll', appFallback, { passive: true });
+      setTimeout(appFallback, 1200);
     } else {
-      loadApp();
+      loadAppOnce();
     }
   }
 
