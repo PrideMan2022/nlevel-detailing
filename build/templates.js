@@ -92,19 +92,13 @@ const stars = (n = 5) =>
     `<svg viewBox="0 0 24 24" aria-hidden="true">${I.star}</svg>`.repeat(n)
   }</span>`;
 
-/* ---------- Логотип ---------- */
-const logoSvg = (cls = 'logo__mark') => `
-<svg class="${cls}" viewBox="0 0 48 48" role="img" aria-label="Логотип NLeveL">
-  <title>NLeveL — детейлинг-студия в Екатеринбурге</title>
-  <defs>
-    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ff4d4d"/><stop offset=".5" stop-color="#ff2d2d"/><stop offset="1" stop-color="#b00000"/>
-    </linearGradient>
-  </defs>
-  <rect width="48" height="48" rx="13" fill="#101316"/>
-  <rect x="1" y="1" width="46" height="46" rx="12" fill="none" stroke="url(#lg)" stroke-width="1.6" opacity=".55"/>
-  <path d="M14 34V14l20 20V14" fill="none" stroke="url(#lg)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+/* ---------- Логотип ----------
+   Фирменная иконка из приложения (app/icons/Icon-512.png).
+   Один источник на шапку, подвал, фавиконки и иконки установки. */
+const logoSvg = (cls = 'logo__mark', r = '') =>
+  `<img class="${cls}" src="${r}assets/icons/logo.webp" width="96" height="96"
+        alt="Логотип детейлинг-студии NLeveL" title="NLeveL — детейлинг в Екатеринбурге"
+        decoding="async">`;
 
 /* ---------- Навигация ---------- */
 const mainNav = [
@@ -137,7 +131,7 @@ function header(page) {
 <header class="appbar" id="appbar">
   <div class="appbar__inner">
     <a class="logo" href="${r || './'}" aria-label="NLeveL — на главную">
-      ${logoSvg()}
+      ${logoSvg('logo__mark', r)}
       <span class="logo__text"><b>N</b>LeveL</span>
     </a>
 
@@ -242,7 +236,7 @@ function footer(page) {
   <div class="shell">
     <div class="footer__grid">
       <div>
-        <a class="logo" href="${r || './'}" style="margin-bottom:.8rem">${logoSvg()}<span class="logo__text"><b>N</b>LeveL</span></a>
+        <a class="logo" href="${r || './'}" style="margin-bottom:.8rem">${logoSvg('logo__mark', r)}<span class="logo__text"><b>N</b>LeveL</span></a>
         <p class="small" style="max-width:32ch">Детейлинг-студия в Екатеринбурге на ЖБИ. Мойка с сохранением ЛКП, полировка, керамика, оклейка плёнкой, химчистка, тонировка и шумоизоляция.</p>
         <div class="socials" style="margin-top:1rem">
           <a href="${biz.telegramUrl}" target="_blank" rel="noopener" aria-label="Telegram-канал NLeveL">${icon('tg')}</a>
@@ -423,7 +417,6 @@ function layout(page, body, opts = {}) {
 <meta name="format-detection" content="telephone=no">
 
 <link rel="manifest" href="${r}manifest.webmanifest">
-<link rel="icon" href="${r}assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="${r}assets/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="${r}assets/icons/icon-180.png">
 <link rel="preconnect" href="https://api-maps.yandex.ru" crossorigin>

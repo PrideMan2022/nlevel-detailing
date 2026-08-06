@@ -248,6 +248,21 @@
     appStub.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadApp(); }
     });
+
+    // Приложение подгружается само, как только окно попадает в поле зрения:
+    // клик не нужен, никуда не перекидывает. Сборка тяжёлая, поэтому
+    // не тянем её тем, кто до этого блока не долистал.
+    if ('IntersectionObserver' in window) {
+      var appIo = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          appIo.disconnect();
+          loadApp();
+        }
+      }, { rootMargin: '200px' });
+      appIo.observe(appStub);
+    } else {
+      loadApp();
+    }
   }
 
   /* ---------- 8. Маска телефона ---------- */

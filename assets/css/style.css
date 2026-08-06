@@ -320,9 +320,11 @@ h4 {
 }
 
 .logo__mark {
-  inline-size: clamp(30px, 28px + 0.9vw, 38px);
-  block-size: clamp(30px, 28px + 0.9vw, 38px);
+  inline-size: clamp(32px, 29px + 1vw, 40px);
+  block-size: clamp(32px, 29px + 1vw, 40px);
   flex-shrink: 0;
+  border-radius: 22%;
+  object-fit: contain;
 }
 
 .logo__text b {

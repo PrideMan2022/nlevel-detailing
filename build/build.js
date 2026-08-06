@@ -649,19 +649,19 @@ function pageBooking() {
   <div class="appframe">
     <div class="appframe__bar">
       <span class="appframe__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="appframe__url">nlevel-detailing.web.app — онлайн-запись NLeveL</span>
+      <span class="appframe__url">Онлайн-запись NLeveL — выбор услуги, дня и времени</span>
       <a class="chip" href="${biz.appUrl}" target="_blank" rel="noopener" aria-label="Открыть приложение в новой вкладке">${icon('external')}</a>
     </div>
     <div class="appframe__body">
-      <div class="appframe__stub"${biz.appEmbed ? ` id="appStub" role="button" tabindex="0" data-src="${biz.appUrl}"` : ''}
+      <div class="appframe__stub"${biz.appEmbed ? ` id="appStub" role="button" tabindex="0" data-src="${r}${biz.appLocal}"` : ''}
            aria-label="Приложение онлайн-записи NLeveL">
         ${icon('app')}
         <h3>Приложение онлайн-записи</h3>
         <p>Вход по номеру телефона или через Telegram. Внутри — выбор услуги, свободные слоты, история визитов и статус работ. Отдельные входы для администратора и мастера.</p>
         ${
           biz.appEmbed
-            ? `<span class="btn btn--primary btn--lg">${icon('calendar')}Открыть приложение</span>
-        <span class="small">Загрузим по клику — чтобы не тормозить страницу</span>`
+            ? `<span class="btn btn--primary btn--lg">${icon('calendar')}Загружаем приложение…</span>
+        <span class="small">Не загрузилось? Нажмите, чтобы открыть</span>`
             : `<a class="btn btn--primary btn--lg" href="${biz.appUrl}" target="_blank" rel="noopener">${icon('calendar')}Открыть приложение</a>
         <span class="small">Откроется в новой вкладке. На телефоне ставится на рабочий стол как обычное приложение.</span>`
         }
@@ -696,131 +696,21 @@ function pageBooking() {
 </section>
 
 <section class="section--tight shell">
-  <div class="section-head">
-    <div>
-      <span class="eyebrow">Или проще</span>
-      <h2>Заявка без регистрации</h2>
-      <p class="lede">Не хотите ставить приложение — оставьте заявку здесь. Мы свяжемся и подтвердим время.</p>
+  <div class="split">
+    <div class="panel">
+      <h2 style="font-size:var(--step-2);margin-bottom:.8rem">Как проходит запись</h2>
+      <ol class="steps" style="grid-template-columns:1fr">
+        <li><b>Записываетесь в приложении</b>Выбираете услугу, свободный день и время.</li>
+        <li><b>Мы подтверждаем</b>Пишем или звоним, называем точную цену и срок работ.</li>
+        <li><b>Напоминаем перед визитом</b>Чтобы вы не приехали зря — и чтобы слот не пропал.</li>
+        <li><b>Пишем, когда готово</b>Не нужно звонить и спрашивать.</li>
+      </ol>
     </div>
-  </div>
-  <div class="split split--aside">
-    <div>
-      <form class="form panel" id="bookingForm" novalidate>
-        <fieldset class="fieldset">
-          <legend>1. Какая услуга нужна</legend>
-          <div class="field">
-            <label for="svc">Услуга <span class="req">*</span></label>
-            <select id="svc" name="service" required>
-              <option value="">— выберите услугу —</option>
-              ${priceGroups
-                .map(
-                  (g) => `<optgroup label="${esc(g.title)}">
-                ${g.items
-                  .map((i) => `<option value="${esc(i.name)} — ${money(i.price)}">${esc(i.name)} — ${money(i.price)}</option>`)
-                  .join('\n                ')}
-              </optgroup>`
-                )
-                .join('\n              ')}
-              <option value="Не знаю, нужна консультация">Не знаю — нужна консультация</option>
-            </select>
-            <span class="field__hint">Не уверены, что выбрать? Возьмите «нужна консультация» — подскажем на осмотре.</span>
-          </div>
-        </fieldset>
-
-        <fieldset class="fieldset">
-          <legend>2. Когда вам удобно</legend>
-          <div class="form__grid">
-            <div class="field">
-              <label for="date">Дата <span class="req">*</span></label>
-              <input type="date" id="date" name="date" required>
-              <span class="field__hint">Работаем ${biz.hours}</span>
-            </div>
-            <div class="field">
-              <label for="car">Марка и модель авто</label>
-              <input type="text" id="car" name="car" placeholder="Например, Toyota Camry" autocomplete="off">
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Время</label>
-            <div class="picker">
-              ${['10:00', '12:00', '14:00', '16:00', '18:00', '19:30']
-                .map(
-                  (t, i) =>
-                    `<input type="radio" name="time" id="t${i}" value="${t}"${i === 0 ? ' checked' : ''}><label for="t${i}">${t}<small>${
-                      i < 3 ? 'обычно свободно' : 'вечерний слот'
-                    }</small></label>`
-                )
-                .join('\n              ')}
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="fieldset">
-          <legend>3. Как с вами связаться</legend>
-          <div class="form__grid">
-            <div class="field">
-              <label for="name">Ваше имя <span class="req">*</span></label>
-              <input type="text" id="name" name="name" required autocomplete="name" placeholder="Как к вам обращаться">
-            </div>
-            <div class="field">
-              <label for="tel">Телефон <span class="req">*</span></label>
-              <input type="tel" id="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="+7 ___ ___-__-__">
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Куда прислать подтверждение</label>
-            <div class="picker">
-              <input type="radio" name="channel" id="ch1" value="WhatsApp" checked><label for="ch1">WhatsApp<small>ответим быстрее всего</small></label>
-              <input type="radio" name="channel" id="ch2" value="Telegram"><label for="ch2">Telegram<small>@${biz.telegram}</small></label>
-              <input type="radio" name="channel" id="ch3" value="Звонок"><label for="ch3">Звонок<small>перезвоним сами</small></label>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="comment">Комментарий</label>
-            <textarea id="comment" name="comment" placeholder="Что беспокоит: царапины, пятна на сиденьях, сколы на капоте…"></textarea>
-          </div>
-        </fieldset>
-
-        <label class="consent">
-          <input type="checkbox" name="consent" required>
-          <span>Согласен на обработку персональных данных для связи по заявке. Данные используются только для подтверждения записи и никому не передаются.</span>
-        </label>
-
-        <button class="btn btn--primary btn--lg btn--block" type="submit">${icon('calendar')}Отправить заявку</button>
-        <p class="small" style="text-align:center">Отправка не списывает деньги и ни к чему не обязывает. Мы свяжемся, чтобы подтвердить время.</p>
-      </form>
-
-      <div class="form-result" id="formResult" role="status" aria-live="polite">
-        <h3>Заявка собрана</h3>
-        <p class="muted" id="resultText"></p>
-        <div class="btn-row">
-          <a class="btn btn--wa" id="waSend" href="${biz.whatsappUrl}" target="_blank" rel="noopener">${icon('wa')}Отправить в WhatsApp</a>
-          <a class="btn btn--tg" id="tgSend" href="${biz.telegramUrl}" target="_blank" rel="noopener">${icon('tg')}Отправить в Telegram</a>
-          <a class="btn btn--ghost" href="tel:${biz.phoneRaw}">${icon('phone')}Позвонить</a>
-        </div>
-        <p class="small">Нажмите кнопку — заявка подставится в сообщение, останется только отправить.</p>
-      </div>
+    <div class="panel">
+      <h2 style="font-size:var(--step-2);margin-bottom:.8rem">Не хотите через приложение?</h2>
+      <p class="muted" style="margin-bottom:.9rem">Позвоните или напишите в мессенджер — запишем вручную и подтвердим время.</p>
+      ${contactList()}
     </div>
-
-    <aside class="sticky-aside">
-      <div class="panel">
-        <h2 style="font-size:var(--step-1);margin-bottom:.8rem">Как проходит запись</h2>
-        <ol class="steps" style="grid-template-columns:1fr">
-          <li><b>Записываетесь в приложении</b>Или оставляете заявку формой — как удобнее.</li>
-          <li><b>Мы подтверждаем</b>Пишем или звоним, называем точную цену и срок работ.</li>
-          <li><b>Напоминаем перед визитом</b>Чтобы вы не приехали зря — и чтобы слот не пропал.</li>
-          <li><b>Пишем, когда готово</b>Не нужно звонить и спрашивать.</li>
-        </ol>
-      </div>
-
-      <div class="panel" style="margin-top:var(--gap-sm)">
-        <h3 style="font-size:var(--step-1);margin-bottom:.7rem">Быстрее — в мессенджер</h3>
-        ${contactList()}
-      </div>
-    </aside>
   </div>
 </section>
 
@@ -1318,6 +1208,8 @@ User-agent: *
 Allow: /
 Disallow: /*?
 Disallow: /*&
+# Приложение онлайн-записи — интерфейс, а не контент. В индексе ему делать нечего.
+Disallow: /app/
 Allow: /assets/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&ymclid&_openstat&from&roistat&fbclid
 
@@ -1325,6 +1217,7 @@ Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid
 User-agent: Yandex
 Allow: /
 Disallow: /*?
+Disallow: /app/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&ymclid&_openstat&from&roistat
 
 # Google

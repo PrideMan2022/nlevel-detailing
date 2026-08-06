@@ -5,6 +5,8 @@ User-agent: *
 Allow: /
 Disallow: /*?
 Disallow: /*&
+# Приложение онлайн-записи — интерфейс, а не контент. В индексе ему делать нечего.
+Disallow: /app/
 Allow: /assets/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&ymclid&_openstat&from&roistat&fbclid
 
@@ -12,6 +14,7 @@ Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid
 User-agent: Yandex
 Allow: /
 Disallow: /*?
+Disallow: /app/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&ymclid&_openstat&from&roistat
 
 # Google
