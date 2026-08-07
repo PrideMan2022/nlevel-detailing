@@ -25,7 +25,13 @@ mkdir -p "$DST"
 
 # downloads/ не берём: там установочные APK на 156 МБ, в репозитории им не место.
 # Их раздаёт Firebase Hosting по адресу nlevel-detailing.web.app/downloads/
-rsync -a --exclude 'downloads/' "$SRC/" "$DST/"
+#
+# canvaskit/ тоже не берём — 37 МБ мёртвого груза. Проверено по сетевым запросам:
+# приложение тянет движок с CDN Google (www.gstatic.com/flutter-canvaskit/...),
+# а локальную папку не открывает ни разу. Если однажды решите хостить движок
+# у себя (для России так надёжнее), уберите canvaskit из исключений и пропишите
+# canvasKitBaseUrl в index.html приложения.
+rsync -a --exclude 'downloads/' --exclude 'canvaskit/' "$SRC/" "$DST/"
 
 # Сайт лежит в подпапке, поэтому корневой base ломает загрузку ресурсов
 if grep -q '<base href="/">' "$DST/index.html"; then
