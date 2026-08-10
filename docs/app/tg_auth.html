@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Auth</title>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #0f1115;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        color: #fff;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      .card {
+        width: 380px;
+        max-width: calc(100vw - 36px);
+        background: #15181e;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+      }
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+      }
+      .sub {
+        font-size: 13px;
+        opacity: 0.85;
+        margin: 0 0 14px 0;
+        line-height: 1.35;
+      }
+      #tg-btn {
+        display: flex;
+        justify-content: center;
+        min-height: 48px;
+      }
+      .hint {
+        margin-top: 14px;
+        font-size: 12px;
+        opacity: 0.7;
+        text-align: center;
+      }
+      .err {
+        margin-top: 12px;
+        background: rgba(255, 40, 40, 0.12);
+        border: 1px solid rgba(255, 40, 40, 0.28);
+        padding: 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        display: none;
+      }
+    </style>
+
+    <script>
+      const TG_BOT_USERNAME = "nlevel_detailing_bot";
+      const TG_FUNCTION_URL = "https://us-central1-nlevel-detailing.cloudfunctions.net/telegramAuth";
+
+      function showError(text) {
+        const el = document.getElementById("err");
+        if (!el) return;
+        el.style.display = "block";
+        el.textContent = text || "Ошибка";
+      }
+
+      function renderTelegramButton() {
+        const host = document.getElementById("tg-btn");
+        if (!host) return;
+
+        host.innerHTML = "";
+
+        const s = document.createElement("script");
+        s.async = true;
+        s.src = "https://telegram.org/js/telegram-widget.js?22";
+        s.setAttribute("data-telegram-login", TG_BOT_USERNAME);
+        s.setAttribute("data-size", "large");
+        s.setAttribute("data-radius", "10");
+        s.setAttribute("data-request-access", "write");
+        s.setAttribute("data-onauth", "onTelegramAuth(user)");
+        host.appendChild(s);
+      }
+
+      async function onTelegramAuth(user) {
+        try {
+          const resp = await fetch(TG_FUNCTION_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ telegram: user })
+          });
+
+          const data = await resp.json();
+
+          if (!resp.ok) {
+            showError("telegramAuth failed: " + (data && data.error ? data.error : resp.status));
+            return;
+          }
+
+          if (!data || !data.token) {
