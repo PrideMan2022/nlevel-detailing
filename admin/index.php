@@ -12,6 +12,9 @@ require_once __DIR__ . '/../inc/auth.php';
 require_once __DIR__ . '/../inc/upload.php';
 require_once __DIR__ . '/ui.php';
 
+security_headers();
+configure_errors();
+
 start_session();
 
 $notice = null;
@@ -94,6 +97,7 @@ $sections = [
     'faq'       => ['Вопросы и ответы', 'check-clock'],
     'contacts'  => ['Контакты', 'pin'],
     'seo'       => ['SEO страниц', 'route'],
+    'legal'     => ['Документы', 'shield'],
     'backups'   => ['Резервные копии', 'shield'],
     'account'   => ['Пароль', 'wallet'],
 ];

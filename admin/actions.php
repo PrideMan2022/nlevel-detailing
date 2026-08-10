@@ -2,6 +2,8 @@
 /** Обработка форм админки. Возвращает [сообщение, ошибка]. */
 declare(strict_types=1);
 
+require_once ROOT . '/inc/sanitize.php';
+
 /** Разбить textarea на массив непустых строк. */
 function lines(string $key): array
 {
@@ -70,9 +72,10 @@ function handle_action(): array
                         }
                         $c['about'] = [
                             'title'      => post_s('about_title'),
-                            'paragraphs' => lines('about_paragraphs'),
+                            // Здесь разрешена разметка, поэтому чистим от лишнего
+                            'paragraphs' => clean_html_lines(lines('about_paragraphs')),
                             'stepsTitle' => post_s('about_steps_title'),
-                            'steps'      => lines('about_steps'),
+                            'steps'      => clean_html_lines(lines('about_steps')),
                         ];
                         // Карточки услуг на главной
                         $cards = [];
@@ -128,7 +131,7 @@ function handle_action(): array
                         }
                         $c['priceGroups'] = $groups;
                         $c['priceLede'] = post_s('priceLede');
-                        $c['priceNotes'] = lines('priceNotes');
+                        $c['priceNotes'] = clean_html_lines(lines('priceNotes'));
                         break;
 
                     /* ---------- Тексты услуговых страниц ---------- */
@@ -208,7 +211,7 @@ function handle_action(): array
                         $c['reviewsLede'] = post_s('reviewsLede');
                         $c['reviewsHonesty'] = [
                             'title'      => post_s('honesty_title'),
-                            'paragraphs' => lines('honesty_paragraphs'),
+                            'paragraphs' => clean_html_lines(lines('honesty_paragraphs')),
                         ];
                         break;
 
@@ -259,7 +262,7 @@ function handle_action(): array
                         $c['biz']['reviews2gis'] = post_i('reviews2gis');
                         $c['route'] = [
                             'title'      => post_s('route_title'),
-                            'paragraphs' => lines('route_paragraphs'),
+                            'paragraphs' => clean_html_lines(lines('route_paragraphs')),
                             'payment'    => post_s('route_payment'),
                             'schedule'   => post_s('route_schedule'),
                         ];
@@ -282,6 +285,30 @@ function handle_action(): array
                                 $c['pages'][$pi]['h1'] = trim((string)($_POST['p_h1'][$i] ?? ''));
                             }
                         }
+                        break;
+
+                    /* ---------- Документы и реквизиты ---------- */
+                    case 'legal':
+                        $c['legal']['operator'] = [
+                            'name'      => post_s('op_name'),
+                            'shortName' => post_s('op_shortName'),
+                            'inn'       => post_s('op_inn'),
+                            'ogrn'      => post_s('op_ogrn'),
+                            'status'    => post_s('op_status'),
+                            'address'   => post_s('op_address'),
+                            'email'     => post_s('op_email'),
+                            'updated'   => post_s('op_updated') ?: date('Y-m-d'),
+                        ];
+                        $c['legal']['banner'] = [
+                            'enabled' => !empty($_POST['bn_enabled']),
+                            'title'   => post_s('bn_title'),
+                            'text'    => post_s('bn_text'),
+                            'accept'  => post_s('bn_accept'),
+                            'decline' => post_s('bn_decline'),
+                            'more'    => post_s('bn_more'),
+                        ];
+                        // В счётчике Метрики бывают только цифры
+                        $c['legal']['metrika'] = preg_replace('~\D~', '', post_s('metrika')) ?: '';
                         break;
 
                     default:
@@ -404,6 +431,65 @@ function handle_action(): array
             case 'add_adv':
                 $c['advantages'][] = ['icon' => 'shield', 'title' => 'Новое преимущество', 'text' => ''];
                 return save_content($c) ? ['Блок добавлен', null] : [null, 'Не удалось сохранить'];
+
+            /* ---------- Текст документа ---------- */
+            case 'save_doc':
+                $slug = post_s('slug');
+                $found = false;
+                foreach ($c['legal']['docs'] as $di => $d) {
+                    if (($d['slug'] ?? '') !== $slug) {
+                        continue;
+                    }
+                    $found = true;
+                    $secs = [];
+                    foreach ((array)($_POST['s_h'] ?? []) as $i => $h) {
+                        $h = trim((string)$h);
+                        if ($h === '') {
+                            continue;
+                        }
+                        $sec = ['h' => $h];
+                        $ps = [];
+                        foreach (preg_split('~\r\n|\r|\n~', (string)($_POST['s_p'][$i] ?? '')) as $l) {
+                            $l = trim($l);
+                            if ($l !== '') {
+                                $ps[] = $l;
+                            }
+                        }
+                        if ($ps) {
+                            $sec['p'] = $ps;
+                        }
+                        $li = [];
+                        foreach (preg_split('~\r\n|\r|\n~', (string)($_POST['s_list'][$i] ?? '')) as $l) {
+                            $l = trim($l);
+                            if ($l !== '') {
+                                $li[] = $l;
+                            }
+                        }
+                        if ($li) {
+                            $sec['list'] = $li;
+                        }
+                        $af = trim((string)($_POST['s_after'][$i] ?? ''));
+                        if ($af !== '') {
+                            $sec['after'] = $af;
+                        }
+                        $secs[] = $sec;
+                    }
+                    $c['legal']['docs'][$di]['title'] = post_s('doc_title');
+                    $c['legal']['docs'][$di]['nav'] = post_s('doc_nav');
+                    $c['legal']['docs'][$di]['lede'] = post_s('doc_lede');
+                    $c['legal']['docs'][$di]['sections'] = $secs;
+                    // Название страницы в общем списке держим в согласии с документом
+                    foreach ($c['pages'] as $pi => $pg) {
+                        if (($pg['slug'] ?? '') === $slug) {
+                            $c['pages'][$pi]['nav'] = post_s('doc_nav');
+                            $c['pages'][$pi]['h1'] = post_s('doc_title');
+                        }
+                    }
+                }
+                if (!$found) {
+                    return [null, 'Документ не найден'];
+                }
+                return save_content($c) ? ['Документ сохранён', null] : [null, 'Не удалось сохранить'];
 
             /* ---------- Резервные копии ---------- */
             case 'restore':

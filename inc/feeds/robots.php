@@ -2,7 +2,9 @@
 /** robots.txt: ИИ-краулеры пускаем, агрессивные SEO-боты — нет. */
 declare(strict_types=1);
 header('Content-Type: text/plain; charset=utf-8');
-$su = site_url();
+// В файл попадают значения из настроек — вычищаем переводы строк,
+// чтобы туда нельзя было дописать посторонние директивы
+$su = preg_replace('~[\r\n]+~', '', site_url()) ?? '';
 $host = preg_replace('~^https?://~', '', $su);
 $utm = 'utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&ymclid&_openstat&from&roistat&fbclid';
 ?>

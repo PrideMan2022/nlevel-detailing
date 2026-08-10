@@ -276,6 +276,15 @@ function render_footer(array $page): void
       </div>
 
       <div>
+        <h3>Документы</h3>
+        <ul>
+          <?php foreach (content()['legal']['docs'] ?? [] as $d): ?>
+          <li><a href="<?= url($d['slug'] ?? '') ?>"><?= e($d['nav'] ?? $d['title'] ?? '') ?></a></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+
+      <div>
         <h3>Контакты</h3>
         <ul>
           <li><a href="tel:<?= e($b['phoneRaw'] ?? '') ?>"><?= e($b['phone'] ?? '') ?></a></li>
@@ -392,8 +401,36 @@ function render_page(array $page, callable $body, array $schema = []): void
 <?php render_footer($page); ?>
 <?php render_tabbar($page); ?>
 <?php render_fab(); ?>
+<?php render_consent(); ?>
 <script src="<?= asset_v('assets/js/app.js') ?>" defer></script>
 </body>
 </html>
 <?php
+}
+
+/* ---------- Уведомление о сборе статистики ---------- */
+
+function render_consent(): void
+{
+    $b = content()['legal']['banner'] ?? [];
+    if (empty($b['enabled'])) {
+        return;
+    }
+    $metrika = trim((string)(content()['legal']['metrika'] ?? ''));
+    ?>
+<div class="consent-bar" id="consentBar" data-metrika="<?= e($metrika) ?>" hidden>
+  <div class="consent-bar__box" role="dialog" aria-modal="false" aria-labelledby="consentTitle">
+    <div class="consent-bar__text">
+      <h2 id="consentTitle"><?= e($b['title'] ?? '') ?></h2>
+      <p><?= e($b['text'] ?? '') ?>
+        <a href="<?= url('privacy') ?>"><?= e($b['more'] ?? 'Подробнее') ?></a>
+      </p>
+    </div>
+    <div class="consent-bar__actions">
+      <button class="btn btn--ghost" type="button" data-consent="necessary"><?= e($b['decline'] ?? 'Только необходимые') ?></button>
+      <button class="btn btn--primary" type="button" data-consent="all"><?= e($b['accept'] ?? 'Принимаю') ?></button>
+    </div>
+  </div>
+</div>
+    <?php
 }

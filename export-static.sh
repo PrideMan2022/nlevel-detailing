@@ -72,6 +72,7 @@ curl -s "http://localhost:$PORT/nesushchestvuyushchaya-stranica/" -o "$OUT/404.h
 echo "▸ Копирую ассеты и приложение"
 rsync -a --exclude '.htaccess' "$ROOT/assets/" "$OUT/assets/"
 rsync -a "$ROOT/app/" "$OUT/app/"
+cp "$ROOT/sw.js" "$OUT/sw.js"          # кэш нужен и статической версии
 touch "$OUT/.nojekyll"
 
 # В статике адреса должны вести на боевой домен Pages, а не на localhost

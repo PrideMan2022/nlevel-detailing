@@ -368,6 +368,56 @@
     });
   }
 
+  /* ---------- 9b. Согласие на сбор статистики ---------- */
+  var bar = $('#consentBar');
+  if (bar) {
+    var KEY = 'nlevel_consent';
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) { /* приватный режим */ }
+
+    var loadMetrika = function (id) {
+      if (!id || window.__ymLoaded) return;
+      window.__ymLoaded = true;
+      window.__ymId = id;
+      (function (m, e, t, r, i, k, a) {
+        m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+        m[i].l = 1 * new Date();
+        k = e.createElement(t); a = e.getElementsByTagName(t)[0];
+        k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+      })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+      window.ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
+    };
+
+    var decide = function (choice) {
+      try { localStorage.setItem(KEY, choice); } catch (e) { /* ничего страшного */ }
+      bar.hidden = true;
+      if (choice === 'all') loadMetrika(bar.dataset.metrika);
+    };
+
+    if (saved === 'all') {
+      loadMetrika(bar.dataset.metrika);
+    } else if (saved !== 'necessary') {
+      // Решение ещё не принято — показываем уведомление
+      bar.hidden = false;
+    }
+
+    $$('[data-consent]', bar).forEach(function (b) {
+      b.addEventListener('click', function () { decide(b.dataset.consent); });
+    });
+  }
+
+  /* ---------- 9c. Кэш для быстрого повторного открытия ---------- */
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      // Путь до корня сайта берём из ссылки на стили — она всегда есть
+      var css = document.querySelector('link[rel=stylesheet]');
+      var root = css ? css.getAttribute('href').split('assets/')[0] : './';
+      navigator.serviceWorker.register(root + 'sw.js', { scope: root }).catch(function () {
+        // Не зарегистрировался — сайт просто работает без кэша
+      });
+    });
+  }
+
   /* ---------- 10. Плавная прокрутка к якорям прайса ---------- */
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (e) {

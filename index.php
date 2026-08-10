@@ -17,10 +17,13 @@ if (PHP_SAPI === 'cli-server') {
         return false;
     }
     $dir = rtrim($real, '/');
+    $realDir = realpath($dir);
     // Админка и другие подпапки со своим index.php.
     // Корень сюда попадать не должен — иначе файл подключит сам себя.
-    if ($dir !== __DIR__ && is_dir($real) && is_file($dir . '/index.php')) {
-        require $dir . '/index.php';
+    // realpath не даёт выйти за пределы проекта через ../ в адресе.
+    if ($realDir && $realDir !== __DIR__ && str_starts_with($realDir, __DIR__ . DIRECTORY_SEPARATOR)
+        && is_file($realDir . '/index.php')) {
+        require $realDir . '/index.php';
         return true;
     }
     // Папка приложения: /app/ → /app/index.html
@@ -37,6 +40,9 @@ require_once __DIR__ . '/inc/helpers.php';
 require_once __DIR__ . '/inc/layout.php';
 require_once __DIR__ . '/inc/blocks.php';
 
+security_headers();
+configure_errors();
+
 /* Какую страницу просят */
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
 $bp = base_path();
@@ -47,6 +53,7 @@ $slug = trim($uri, '/');
 if ($slug === '' || $slug === 'index.php') {
     $slug = 'index';
 }
+
 
 /* Служебные адреса, которые генерируются на лету */
 if ($slug === 'sitemap.xml') {
@@ -65,6 +72,15 @@ if ($slug === 'llms.txt' || $slug === 'llms-full.txt') {
 if ($slug === 'manifest.webmanifest') {
     require __DIR__ . '/inc/feeds/manifest.php';
     exit;
+}
+
+/**
+ * Дальше адрес участвует в имени подключаемого файла, поэтому пропускаем
+ * только простые слова из латиницы, цифр и дефиса. Служебные адреса с точкой
+ * (sitemap.xml и прочие) разобраны выше и сюда не доходят.
+ */
+if (!preg_match('~^[a-z0-9][a-z0-9-]{0,60}$~', $slug)) {
+    $slug = '__not_found__';
 }
 
 /* Ищем страницу в контенте */
@@ -99,6 +115,8 @@ if (!$page) {
 $tpl = __DIR__ . '/inc/pages/' . $slug . '.php';
 if (is_file($tpl)) {
     require $tpl;
+} elseif (!empty($page['legal'])) {
+    require __DIR__ . '/inc/pages/legal.php';
 } elseif (!empty($page['service'])) {
     require __DIR__ . '/inc/pages/service.php';
 } else {

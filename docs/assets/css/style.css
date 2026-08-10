@@ -2252,3 +2252,109 @@ a.card:hover .card__media img {
     color: #555;
   }
 }
+
+/* ---------- 22. УВЕДОМЛЕНИЕ О СБОРЕ СТАТИСТИКИ ---------- */
+/* Атрибут hidden обязан побеждать: display:flex ниже иначе перебивает его,
+   и плашка остаётся на экране после нажатия «Принимаю». */
+.consent-bar[hidden] {
+  display: none !important;
+}
+
+.consent-bar {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 150;
+  padding: var(--gap-sm);
+  padding-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--gap-sm));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  animation: consent-in 0.35s var(--ease) both;
+}
+
+@media (min-width: 62rem) {
+  .consent-bar {
+    padding-block-end: var(--gap-md);
+  }
+}
+
+@keyframes consent-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consent-bar { animation: none; }
+}
+
+.consent-bar__box {
+  pointer-events: auto;
+  inline-size: min(58rem, 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-sm) var(--gap-md);
+  padding: var(--gap-md);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-3);
+}
+
+.consent-bar__text {
+  flex: 1 1 22rem;
+  min-inline-size: 0;
+}
+
+.consent-bar__text h2 {
+  font-size: var(--step-1);
+  margin-bottom: 0.3rem;
+}
+
+.consent-bar__text p {
+  font-size: var(--step--1);
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.consent-bar__text a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.consent-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+  flex: 0 1 auto;
+}
+
+@media (max-width: 40rem) {
+  .consent-bar__actions { inline-size: 100%; }
+  .consent-bar__actions .btn { flex: 1 1 10rem; }
+}
+
+/* Пока решение не принято, плавающие кнопки не мешают уведомлению.
+   Комбинатор ~ здесь не подходит: .fab стоит в разметке раньше плашки,
+   а он смотрит только вперёд. Поэтому проверяем через :has() у body. */
+body:has(.consent-bar:not([hidden])) .fab {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* ---------- Страница документа ---------- */
+.legal-doc h2 {
+  font-size: var(--step-2);
+  margin-block-start: var(--gap-md);
+}
+
+.legal-doc p,
+.legal-doc li {
+  font-size: var(--step-0);
+}

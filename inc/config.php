@@ -56,3 +56,47 @@ function site_url(): string
 }
 
 session_name('nlevel_admin');
+
+/**
+ * Заголовки безопасности отдаём из PHP, а не только из .htaccess:
+ * на nginx-хостингах .htaccess не читается, и защита бы потерялась.
+ */
+function security_headers(): void
+{
+    if (headers_sent()) {
+        return;
+    }
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()');
+    header('Cross-Origin-Opener-Policy: same-origin-allow-popups');
+    header_remove('X-Powered-By');
+
+    // Что странице разрешено загружать. Карту Яндекса и Метрику пускаем,
+    // остальное — только со своего домена. Внешних скриптов у сайта нет.
+    $csp = [
+        "default-src 'self'",
+        "script-src 'self' https://mc.yandex.ru https://api-maps.yandex.ru https://yastatic.net",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https://mc.yandex.ru https://*.maps.yandex.net https://*.yandex.ru https://*.gstatic.com",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        "connect-src 'self' https://mc.yandex.ru https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://www.gstatic.com wss://*.firebaseio.com",
+        "frame-src 'self' https://yandex.ru https://*.yandex.ru https://oauth.telegram.org",
+        "frame-ancestors 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+    ];
+    header('Content-Security-Policy: ' . implode('; ', $csp));
+}
+
+/** В бою подробности ошибок посетителю не показываем — только в лог. */
+function configure_errors(): void
+{
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $local = str_starts_with($host, 'localhost') || str_starts_with($host, '127.0.0.1');
+    ini_set('display_errors', $local ? '1' : '0');
+    ini_set('log_errors', '1');
+    error_reporting(E_ALL);
+}
