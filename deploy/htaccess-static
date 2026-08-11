@@ -1,0 +1,76 @@
+# .htaccess для СТАТИЧЕСКОЙ версии сайта NLeveL.
+#
+# Кладётся в корень сайта на хостинге. От основного .htaccess отличается тем,
+# что здесь нет маршрутизации на index.php — PHP в статике не участвует.
+#
+# На хостинге Руцентра модули включаются в панели:
+#   Управление веб-сервером → Настройки сервера
+# Нужны: rewrite_module, headers_module, deflate_module, expires_module.
+# Блоки ниже завёрнуты в <IfModule>, поэтому при выключенном модуле они просто
+# ничего не делают — сайт не падает, но и сжатия с кэшем не будет.
+
+AddDefaultCharset UTF-8
+
+# Листинг каталогов запрещён: иначе по /assets/img/ виден весь архив
+Options -Indexes
+
+DirectoryIndex index.html
+
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Только HTTPS. Включать после того, как выпущен SSL-сертификат,
+    # иначе браузер упрётся в ошибку вместо сайта.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # Один адрес вместо двух: www склеиваем с основным
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+    # Технический адрес хостинга не должен отдавать сайт: это его полный дубль,
+    # и поисковик может проиндексировать сайт по чужому имени
+    RewriteCond %{HTTP_HOST} \.nichost\.ru$ [NC]
+    RewriteRule ^ https://nlevel.pro%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Сжатие: страница весит втрое меньше, это заметно на мобильном интернете
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/png  "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css   "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    # HTML не кэшируем: иначе правки цен посетитель увидит через неделю
+    ExpiresByType text/html  "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(webp|png|jpe?g|svg|woff2?|css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # Service worker обязан проверяться каждый раз, иначе сайт застрянет
+    # на старой версии и обновление до посетителя не доедет
+    <Files "sw.js">
+        Header set Cache-Control "no-cache, max-age=0"
+    </Files>
+</IfModule>

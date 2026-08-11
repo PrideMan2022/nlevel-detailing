@@ -12,3 +12,6 @@ data/backups/
 # Картинки, загруженные через админку, живут на боевом сервере
 assets/img/uploads/*
 !assets/img/uploads/.htaccess
+
+# Сборка под свой домен — дубль docs/, в репозитории не нужна
+build-*/

@@ -12,7 +12,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-OUT="$ROOT/docs"
+# Куда складывать слепок. По умолчанию docs/ — так требует GitHub Pages.
+# Для обычного хостинга: OUT=build-nlevel.pro SITE_URL=https://nlevel.pro ./export-static.sh
+OUT="${OUT:-docs}"
+case "$OUT" in /*) ;; *) OUT="$ROOT/$OUT" ;; esac
 PORT=8765
 # Адрес, который попадёт в canonical, sitemap и Open Graph статической версии
 SITE_URL="${SITE_URL:-https://prideman2022.github.io/nlevel-detailing}"
@@ -75,6 +78,9 @@ rsync -a "$ROOT/app/" "$OUT/app/"
 cp "$ROOT/sw.js" "$OUT/sw.js"          # кэш нужен и статической версии
 touch "$OUT/.nojekyll"
 
+# Правила для Apache-хостинга. GitHub Pages файл игнорирует, вреда нет.
+cp "$ROOT/deploy/htaccess-static" "$OUT/.htaccess"
+
 # В статике адреса должны вести на боевой домен Pages, а не на localhost
 echo "▸ Правлю адреса на $SITE_URL"
 find "$OUT" -type f \( -name '*.html' -o -name '*.xml' -o -name '*.txt' -o -name '*.webmanifest' \) \
@@ -82,8 +88,12 @@ find "$OUT" -type f \( -name '*.html' -o -name '*.xml' -o -name '*.txt' -o -name
 
 # На Pages сайт живёт в подпапке, поэтому ссылки от корня домена нужно
 # дополнить её именем — иначе они уведут на чужой корень.
-SUBPATH="/$(basename "$SITE_URL")"
-if [ "$SUBPATH" != "/" ]; then
+# Подпапку берём из пути в адресе, а не из последнего куска строки:
+# у https://nlevel.pro пути нет, и подпапка не нужна.
+SUBPATH="$(SITE_URL="$SITE_URL" python3 -c '
+import os, urllib.parse
+print(urllib.parse.urlsplit(os.environ["SITE_URL"]).path.rstrip("/"))')"
+if [ -n "$SUBPATH" ]; then
   echo "▸ Добавляю подпапку $SUBPATH к внутренним ссылкам"
   OUT="$OUT" SUBPATH="$SUBPATH" python3 - <<'PYEOF'
 import os, re
