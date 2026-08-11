@@ -168,9 +168,19 @@ render_page($page, function () use ($b, $gal, $heroPhotos, $cards) { ?>
     <a class="btn btn--ghost" href="<?= url('reviews') ?>">Все отзывы</a>
   </div>
   <?php block_rating(); ?>
-  <div class="grid" style="margin-top:var(--gap-md)">
-    <?php foreach (array_slice(reviews(), 0, 6) as $r) { block_review($r); } ?>
+  <?php $orgId = trim((string)($b['yandexOrgId'] ?? '')); if ($orgId !== ''): ?>
+  <div class="reviews-widget" style="margin-top:var(--gap-md)">
+    <div class="reviews-widget__head">
+      <?= icon('star') ?>
+      <span>Отзывы с Яндекс.Карт — обновляются автоматически</span>
+      <a class="chip" href="<?= e($b['yandexMapUrl'] ?? '') ?>" target="_blank" rel="noopener">Открыть на Яндексе</a>
+    </div>
+    <iframe class="reviews-widget__frame reviews-widget__frame--short"
+            src="https://yandex.ru/maps-reviews-widget/<?= e($orgId) ?>?comments"
+            title="Отзывы о детейлинг-студии NLeveL на Яндекс.Картах"
+            loading="lazy"></iframe>
   </div>
+  <?php endif; ?>
 </section>
 
 <?php $about = content()['about'] ?? null; if ($about): ?>

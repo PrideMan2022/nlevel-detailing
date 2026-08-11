@@ -84,10 +84,10 @@ foreach (faq_items() as $f) {
 
 echo "---\n\n# Отзывы клиентов\n\n";
 echo "Средняя оценка: " . rating_avg() . " из 5 по " . reviews_total() . " отзывам.\n";
-echo "Яндекс.Карты: {$b['ratingYandex']} ({$b['reviewsYandex']} отзывов). 2ГИС: {$b['rating2gis']} ({$b['reviews2gis']} отзыв).\n\n";
-foreach (reviews() as $r) {
-    echo "## {$r['author']} — {$r['rating']}/5, {$r['dateText']}, {$r['source']}\n«{$r['text']}»\n\n";
-}
+echo "Яндекс.Карты: {$b['ratingYandex']} ({$b['reviewsYandex']} отзывов) — {$b['yandexMapUrl']}\n";
+echo "2ГИС: {$b['rating2gis']} ({$b['reviews2gis']} отзыв) — {$b['gis2ReviewsUrl']}\n\n";
+echo "Тексты отзывов не дублируются на сайте: он показывает живой виджет Яндекс.Карт, ";
+echo "поэтому актуальные отзывы всегда доступны по ссылкам выше.\n\n";
 
 echo "---\n\n# Как доехать\n\n";
 echo "Адрес: {$b['city']}, {$b['street']}. Район {$b['district']}.\n{$b['addressNote']}.\n";

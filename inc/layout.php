@@ -296,6 +296,8 @@ function render_footer(array $page): void
       </div>
     </div>
 
+    <?php render_requisites(); ?>
+
     <div class="footer__bottom">
       <span>© <?= date('Y') ?> NLeveL — детейлинг-студия, Екатеринбург</span>
       <span>Информация на сайте не является публичной офертой. Итоговая стоимость подтверждается до начала работ.</span>
@@ -431,6 +433,33 @@ function render_consent(): void
       <button class="btn btn--primary" type="button" data-consent="all"><?= e($b['accept'] ?? 'Принимаю') ?></button>
     </div>
   </div>
+</div>
+    <?php
+}
+
+/**
+ * Сведения об исполнителе.
+ *
+ * Закон «О защите прав потребителей» (ст. 9) требует довести до потребителя
+ * наименование исполнителя, адрес и режим работы. Для самозанятого
+ * наименование — это ФИО. Поэтому блок стоит в подвале каждой страницы,
+ * а не только внутри документов.
+ */
+function render_requisites(): void
+{
+    $op = content()['legal']['operator'] ?? [];
+    $b = biz();
+    $name = trim((string)($op['name'] ?? ''));
+    if ($name === '') {
+        return;
+    }
+    ?>
+<div class="requisites">
+  <b>Исполнитель:</b> <?= e($name) ?><?php if (!empty($op['status'])): ?>, <?= e($op['status']) ?><?php endif; ?><?php if (!empty($op['inn'])): ?>, ИНН <?= e($op['inn']) ?><?php endif; ?><?php if (!empty($op['ogrn'])): ?>, ОГРНИП <?= e($op['ogrn']) ?><?php endif; ?>.
+  <b>Адрес:</b> <?= e($b['city'] ?? '') ?>, <?= e($b['street'] ?? '') ?>.
+  <b>Режим работы:</b> <?= e($b['hours'] ?? '') ?>.
+  <b>Телефон:</b> <a href="tel:<?= e($b['phoneRaw'] ?? '') ?>"><?= e($b['phone'] ?? '') ?></a><?php if (!empty($op['email'])): ?>.
+  <b>Почта:</b> <a href="mailto:<?= e($op['email']) ?>"><?= e($op['email']) ?></a><?php endif; ?>.
 </div>
     <?php
 }

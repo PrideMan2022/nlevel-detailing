@@ -188,26 +188,8 @@ function handle_action(): array
                         $c['worksLede'] = post_s('worksLede');
                         break;
 
-                    /* ---------- Отзывы ---------- */
+                    /* ---------- Тексты страницы отзывов ---------- */
                     case 'reviews':
-                        $rv = [];
-                        foreach ((array)($_POST['r_author'] ?? []) as $i => $a) {
-                            $a = trim((string)$a);
-                            if ($a === '') {
-                                continue;
-                            }
-                            $date = trim((string)($_POST['r_date'][$i] ?? ''));
-                            $rv[] = [
-                                'author'   => $a,
-                                'date'     => $date,
-                                'dateText' => trim((string)($_POST['r_datetext'][$i] ?? '')) ?: ($date ? ru_date($date) : ''),
-                                'rating'   => max(1, min(5, (int)($_POST['r_rating'][$i] ?? 5))),
-                                'source'   => trim((string)($_POST['r_source'][$i] ?? '')),
-                                'text'     => trim((string)($_POST['r_text'][$i] ?? '')),
-                                'tag'      => trim((string)($_POST['r_tag'][$i] ?? '')),
-                            ];
-                        }
-                        $c['reviews'] = $rv;
                         $c['reviewsLede'] = post_s('reviewsLede');
                         $c['reviewsHonesty'] = [
                             'title'      => post_s('honesty_title'),
@@ -311,6 +293,32 @@ function handle_action(): array
                         $c['legal']['metrika'] = preg_replace('~\D~', '', post_s('metrika')) ?: '';
                         break;
 
+                    /* ---------- robots.txt и карта сайта ---------- */
+                    case 'files':
+                        $c['seoFiles'] = [
+                            'robots'    => (string)($_POST['robots'] ?? ''),
+                            'extraUrls' => lines('extraUrls'),
+                        ];
+                        foreach ((array)($_POST['sm_slug'] ?? []) as $i => $slug) {
+                            $slug = trim((string)$slug);
+                            foreach ($c['pages'] as $pi => $pg) {
+                                if (($pg['slug'] ?? '') !== $slug) {
+                                    continue;
+                                }
+                                $pr = (string)($_POST['sm_priority'][$i] ?? '0.7');
+                                $fr = (string)($_POST['sm_freq'][$i] ?? 'monthly');
+                                $c['pages'][$pi]['priority'] = in_array($pr, ['1.0','0.9','0.8','0.7','0.5','0.3'], true) ? $pr : '0.7';
+                                $c['pages'][$pi]['changefreq'] = in_array($fr, ['daily','weekly','monthly','yearly'], true) ? $fr : 'monthly';
+                                // Галочка снята — страница выпадает из карты
+                                if (empty($_POST['sm_in'][$i])) {
+                                    $c['pages'][$pi]['noSitemap'] = true;
+                                } else {
+                                    unset($c['pages'][$pi]['noSitemap']);
+                                }
+                            }
+                        }
+                        break;
+
                     default:
                         return [null, 'Неизвестный раздел'];
                 }
@@ -357,14 +365,6 @@ function handle_action(): array
                     delete_upload($name);
                 }
                 return save_content($c) ? ['Фото удалено', null] : [null, 'Не удалось сохранить'];
-
-            case 'del_review':
-                $i = post_i('idx', -1);
-                if (!isset($c['reviews'][$i])) {
-                    return [null, 'Отзыв не найден'];
-                }
-                array_splice($c['reviews'], $i, 1);
-                return save_content($c) ? ['Отзыв удалён', null] : [null, 'Не удалось сохранить'];
 
             case 'del_faq':
                 $i = post_i('idx', -1);
@@ -416,13 +416,6 @@ function handle_action(): array
                     'title' => 'Новый раздел', 'note' => '', 'items' => [],
                 ];
                 return save_content($c) ? ['Раздел добавлен', null] : [null, 'Не удалось сохранить'];
-
-            case 'add_review':
-                array_unshift($c['reviews'], [
-                    'author' => 'Имя клиента', 'date' => date('Y-m-d'), 'dateText' => ru_date(date('Y-m-d')),
-                    'rating' => 5, 'source' => 'Яндекс.Карты', 'text' => '', 'tag' => '',
-                ]);
-                return save_content($c) ? ['Отзыв добавлен — заполните его', null] : [null, 'Не удалось сохранить'];
 
             case 'add_faq':
                 $c['faq'][] = ['q' => 'Новый вопрос', 'a' => ''];

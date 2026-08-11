@@ -93,11 +93,12 @@ $sections = [
     'services'  => ['Услуги и прайс', 'price'],
     'texts'     => ['Тексты страниц', 'app'],
     'gallery'   => ['Фотографии', 'gallery'],
-    'reviews'   => ['Отзывы', 'star'],
+    'reviews'   => ['Страница отзывов', 'star'],
     'faq'       => ['Вопросы и ответы', 'check-clock'],
     'contacts'  => ['Контакты', 'pin'],
     'seo'       => ['SEO страниц', 'route'],
     'legal'     => ['Документы', 'shield'],
+    'files'     => ['robots и карта сайта', 'route'],
     'backups'   => ['Резервные копии', 'shield'],
     'account'   => ['Пароль', 'wallet'],
 ];

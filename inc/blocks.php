@@ -71,27 +71,6 @@ function block_rating(): void
     <?php
 }
 
-function block_review(array $r): void
-{
-    ?>
-<article class="review reveal">
-  <div class="review__top">
-    <span class="review__ava" aria-hidden="true"><?= e(initial($r['author'] ?? '?')) ?></span>
-    <span class="review__who">
-      <b><?= e($r['author'] ?? '') ?></b>
-      <span><?= e($r['dateText'] ?? '') ?></span>
-    </span>
-    <span style="margin-inline-start:auto"><?= stars((int)($r['rating'] ?? 5)) ?></span>
-  </div>
-  <p class="review__text"><?= e($r['text'] ?? '') ?></p>
-  <div class="review__src">
-    <span><?= e($r['source'] ?? '') ?></span>
-    <?php if (!empty($r['tag'])): ?><span class="chip"><?= e($r['tag']) ?></span><?php endif; ?>
-  </div>
-</article>
-    <?php
-}
-
 function block_faq(array $items, string $title = 'Частые вопросы'): void
 {
     if (!$items) {

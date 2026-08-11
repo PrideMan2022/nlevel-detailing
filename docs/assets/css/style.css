@@ -2358,3 +2358,67 @@ body:has(.consent-bar:not([hidden])) .fab {
 .legal-doc li {
   font-size: var(--step-0);
 }
+
+/* ---------- 23. ВИДЖЕТ ОТЗЫВОВ ЯНДЕКСА ---------- */
+.reviews-widget {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.reviews-widget__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem var(--gap-sm);
+  border-block-end: 1px solid var(--line-soft);
+  font-size: var(--step--1);
+  color: var(--text-2);
+}
+
+.reviews-widget__head svg {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  color: var(--star);
+  flex-shrink: 0;
+}
+
+.reviews-widget__head span {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.reviews-widget__head .chip {
+  flex-shrink: 0;
+}
+
+@media (max-width: 32rem) {
+  .reviews-widget__head span { display: none; }
+}
+
+.reviews-widget__frame {
+  inline-size: 100%;
+  block-size: clamp(520px, 70dvh, 800px);
+  border: 0;
+  display: block;
+  background: var(--surface);
+}
+
+.reviews-widget__frame--short {
+  block-size: clamp(420px, 55dvh, 560px);
+}
+
+/* ---------- 24. РЕКВИЗИТЫ ИСПОЛНИТЕЛЯ ---------- */
+.requisites {
+  padding: var(--gap-sm) 0;
+  border-block-start: 1px solid var(--line-soft);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.requisites b {
+  color: var(--text-2);
+  font-weight: 600;
+}

@@ -9,6 +9,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 <?php foreach (all_pages() as $p):
+    // Страницу можно убрать из карты в админке
+    if (!empty($p['noSitemap'])) { continue; }
     $slug = ($p['slug'] ?? '') === 'index' ? '' : ($p['slug'] ?? ''); ?>
   <url>
     <loc><?= e($su . '/' . ($slug === '' ? '' : $slug . '/')) ?></loc>
@@ -22,6 +24,14 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
       <image:caption><?= e($g['alt'] ?? '') ?></image:caption>
     </image:image>
 <?php endforeach; endif; ?>
+  </url>
+<?php endforeach; ?>
+<?php foreach (content()['seoFiles']['extraUrls'] ?? [] as $u): if (trim($u) === '') { continue; } ?>
+  <url>
+    <loc><?= e(str_starts_with($u, 'http') ? $u : $su . '/' . ltrim($u, '/')) ?></loc>
+    <lastmod><?= $today ?></lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 <?php endforeach; ?>
 </urlset>
