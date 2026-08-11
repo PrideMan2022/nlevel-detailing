@@ -2686,3 +2686,10 @@ body:has(.consent-bar:not([hidden])) .fab {
   flex-shrink: 0;
   color: var(--accent);
 }
+
+/* Компактная кнопка — для ссылок из прайса на страницы услуг */
+.btn--sm {
+  min-block-size: 38px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+}

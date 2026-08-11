@@ -51,8 +51,12 @@ render_page($page, function () use ($b, $groups) { ?>
   <?php foreach ($groups as $g): ?>
   <div class="price-group" id="<?= e($g['id'] ?? '') ?>">
     <div class="price-group__head">
+      <?php $link = content()['priceGroupLinks'][$g['id'] ?? ''] ?? null; $lp = $link ? find_page($link) : null; ?>
       <h2><?= e($g['title'] ?? '') ?></h2>
       <?php if (!empty($g['note'])): ?><p class="small" style="flex:1 1 20ch"><?= e($g['note']) ?></p><?php endif; ?>
+      <?php if ($lp): ?>
+      <a class="btn btn--ghost btn--sm" href="<?= url($link) ?>">Подробно: <?= e(mb_strtolower($lp['nav'] ?? '', 'UTF-8')) ?> в Екатеринбурге →</a>
+      <?php endif; ?>
     </div>
     <div class="ptable">
       <?php foreach ($g['items'] as $it) { block_price_row($it); } ?>

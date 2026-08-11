@@ -9,9 +9,11 @@ $c = content()['serviceContent'][$slug] ?? ['intro' => '', 'blocks' => []];
 /* Какие позиции прайса показывать на этой странице */
 $items = [];
 if ($slug === 'oklejka-plenkoj') {
-    $items = (find_group('plenka')['items'] ?? []);
+    // Эта страница — про внешний вид: смена цвета, антихром, обвесы.
+    // Защитный полиуретан живёт на отдельной странице, чтобы две страницы
+    // не делили один прайс и не мешали друг другу в выдаче.
     foreach ((find_group('styling')['items'] ?? []) as $i) {
-        if (str_contains($i['name'] ?? '', 'Styling') || str_contains($i['name'] ?? '', 'Антихром')) {
+        if (!str_contains($i['name'] ?? '', 'Тонировка') && !str_contains($i['name'] ?? '', 'Притемнение')) {
             $items[] = $i;
         }
     }
@@ -139,6 +141,29 @@ render_page($page, function () use ($b, $page, $c, $items, $minPrice, $photos, $
   </div>
 </section>
 
+<?php
+$crossRef = [
+  'oklejka-plenkoj'       => ['antigraviynaya-plenka', 'Нужна защита от камней, а не смена цвета?',
+                              'Антигравийный полиуретан — прозрачная плёнка, которая принимает удары камней на себя. Весь кузов 165 000 ₽, зона риска 60 000 ₽.'],
+  'antigraviynaya-plenka' => ['oklejka-plenkoj', 'Хотите поменять цвет, а не защитить кузов?',
+                              'Виниловая плёнка меняет внешний вид: полная смена цвета 60 000 ₽, антихром 1 500 ₽ за элемент, обвесы 17 000 ₽.'],
+][$slug] ?? null;
+if ($crossRef): $cp = find_page($crossRef[0]); ?>
+<section class="section--tight shell">
+  <div class="panel panel--accent">
+    <div class="split" style="gap:var(--gap-sm);align-items:center">
+      <div>
+        <h2 style="font-size:var(--step-2);margin-bottom:.4rem"><?= e($crossRef[1]) ?></h2>
+        <p class="muted" style="margin:0"><?= e($crossRef[2]) ?></p>
+      </div>
+      <div>
+        <a class="btn btn--primary" href="<?= url($crossRef[0]) ?>"><?= e($cp['nav'] ?? '') ?> в Екатеринбурге →</a>
+      </div>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
+
 <section class="section shell">
   <div class="split split--aside">
     <div class="prose">
@@ -162,7 +187,7 @@ render_page($page, function () use ($b, $page, $c, $items, $minPrice, $photos, $
 
     <aside class="sticky-aside">
       <div class="panel">
-        <h3 style="font-size:var(--step-1);margin-bottom:.7rem">Записаться на <?= e(mb_strtolower($page['nav'] ?? '', 'UTF-8')) ?></h3>
+        <h3 style="font-size:var(--step-1);margin-bottom:.7rem">Записаться на <?= e($page['navAcc'] ?? mb_strtolower($page['nav'] ?? '', 'UTF-8')) ?></h3>
         <p class="small" style="margin-bottom:.9rem">Подтвердим время и назовём точную цену до начала работ.</p>
         <a class="btn btn--primary btn--block" href="<?= url('booking') ?>"><?= icon('calendar') ?>Онлайн-запись</a>
         <div class="btn-row" style="margin-top:.5rem">
@@ -197,6 +222,6 @@ render_page($page, function () use ($b, $page, $c, $items, $minPrice, $photos, $
 <?php endif; ?>
 
 <?php block_faq($relFaq); ?>
-<?php block_cta('Запишитесь на ' . mb_strtolower($page['nav'] ?? '', 'UTF-8'), 'Приезжайте на осмотр — назовём точную цену и срок, а решать будете вы.'); ?>
+<?php block_cta('Запишитесь на ' . ($page['navAcc'] ?? mb_strtolower($page['nav'] ?? '', 'UTF-8')), 'Приезжайте на осмотр — назовём точную цену и срок, а решать будете вы.'); ?>
 
 <?php }, $schema);
