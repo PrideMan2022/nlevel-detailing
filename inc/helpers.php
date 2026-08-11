@@ -121,5 +121,33 @@ function tpl(string $s): string
         '{year}'    => date('Y'),
         '{rating}'  => (string)rating_avg(),
         '{reviews}' => (string)reviews_total(),
+        // Число вместе со словом в правильной форме: 1 отзыв, 56 отзывов.
+        '{reviewsN}' => nplural(reviews_total(), ['отзыв', 'отзыва', 'отзывов']),
     ]);
+}
+
+/**
+ * Склонение существительного при числе: 1 отзыв, 2 отзыва, 5 отзывов.
+ * Раньше на сайте везде стояло «56 отзыва» — по-русски так не говорят.
+ */
+function plural(int $n, array $forms): string
+{
+    $n = abs($n) % 100;
+    $n1 = $n % 10;
+    if ($n > 10 && $n < 20) {
+        return $forms[2];
+    }
+    if ($n1 > 1 && $n1 < 5) {
+        return $forms[1];
+    }
+    if ($n1 === 1) {
+        return $forms[0];
+    }
+    return $forms[2];
+}
+
+/** Число со словом: «56 отзывов». */
+function nplural(int $n, array $forms): string
+{
+    return $n . ' ' . plural($n, $forms);
 }

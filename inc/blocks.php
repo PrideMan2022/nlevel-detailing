@@ -55,16 +55,16 @@ function block_rating(): void
   <div class="rating-box__score">
     <b><?= rating_avg() ?></b>
     <?= stars(5) ?>
-    <p class="small" style="margin-top:.4rem"><?= reviews_total() ?> отзыва</p>
+    <p class="small" style="margin-top:.4rem"><?= nplural(reviews_total(), ['отзыв','отзыва','отзывов']) ?></p>
   </div>
   <div>
     <p style="font-weight:700">Яндекс.Карты</p>
-    <p class="muted"><?= e((string)($b['ratingYandex'] ?? '')) ?> из 5 · <?= e((string)($b['reviewsYandex'] ?? '')) ?> отзывов</p>
+    <p class="muted"><?= e((string)($b['ratingYandex'] ?? '')) ?> из 5 · <?= nplural((int)($b['reviewsYandex'] ?? 0), ['отзыв','отзыва','отзывов']) ?></p>
     <p style="margin-top:.7rem"><a class="btn btn--ghost" href="<?= e($b['yandexMapUrl'] ?? '') ?>" target="_blank" rel="noopener">Смотреть на Яндексе</a></p>
   </div>
   <div>
     <p style="font-weight:700">2ГИС</p>
-    <p class="muted"><?= e((string)($b['rating2gis'] ?? '')) ?> из 5 · <?= e((string)($b['reviews2gis'] ?? '')) ?> отзыв</p>
+    <p class="muted"><?= e((string)($b['rating2gis'] ?? '')) ?> из 5 · <?= nplural((int)($b['reviews2gis'] ?? 0), ['отзыв','отзыва','отзывов']) ?></p>
     <p style="margin-top:.7rem"><a class="btn btn--ghost" href="<?= e($b['gis2ReviewsUrl'] ?? '') ?>" target="_blank" rel="noopener">Смотреть в 2ГИС</a></p>
   </div>
 </div>

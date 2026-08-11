@@ -33,6 +33,14 @@ mkdir -p "$DST"
 # canvasKitBaseUrl в index.html приложения.
 rsync -a --exclude 'downloads/' --exclude 'canvaskit/' "$SRC/" "$DST/"
 
+# Приложение не должно попадать в поиск как отдельная страница —
+# это интерфейс, а не контент, и он дублировал бы страницу записи
+if ! grep -q 'name="robots"' "$DST/index.html"; then
+  sed -i '' 's|<meta charset="UTF-8">|<meta charset="UTF-8">\
+  <meta name="robots" content="noindex, nofollow">|' "$DST/index.html"
+  echo "▸ приложению проставлен noindex"
+fi
+
 # Сайт лежит в подпапке, поэтому корневой base ломает загрузку ресурсов
 if grep -q '<base href="/">' "$DST/index.html"; then
   sed -i '' 's|<base href="/">|<base href="./">|' "$DST/index.html"

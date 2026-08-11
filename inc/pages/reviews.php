@@ -9,21 +9,14 @@ $b = biz();
 $orgId = trim((string)($b['yandexOrgId'] ?? ''));
 
 /* Оценки берём из настроек — они же уходят в микроразметку.
-   Сами тексты отзывов отдаёт Яндекс, дублировать их у себя не нужно:
-   поисковики не учитывают отзывы, размещённые на собственном сайте. */
-$schema = [[
-    '@context' => 'https://schema.org',
-    '@type'    => 'LocalBusiness',
-    '@id'      => site_url() . '/#org',
-    'name'     => $b['name'] ?? 'NLeveL',
-    'aggregateRating' => [
-        '@type'       => 'AggregateRating',
-        'ratingValue' => rating_avg(),
-        'reviewCount' => reviews_total(),
-        'bestRating'  => 5,
-        'worstRating' => 1,
-    ],
-]];
+   Тексты отзывов живут в виджете Яндекса, а не в нашем HTML. Это осознанный
+   размен: отзывы нельзя подделать и они обновляются сами, но звёзды в сниппете
+   Google может не показать — он требует, чтобы рейтинг подтверждался текстом
+   на самой странице. Достоверность здесь важнее украшения выдачи. */
+/* Отдельного блока с рейтингом здесь нет: он уже добавлен к организации
+   в layout.php именно для этой страницы. Два aggregateRating на один @id
+   поисковик считает противоречием и может проигнорировать оба. */
+$schema = [];
 
 render_page($page, function () use ($b, $orgId) { ?>
 
@@ -60,7 +53,7 @@ render_page($page, function () use ($b, $orgId) { ?>
   <div class="split" style="margin-top:var(--gap-md)">
     <div class="panel">
       <h2 style="font-size:var(--step-2);margin-bottom:.6rem">Отзывы в 2ГИС</h2>
-      <p class="muted" style="margin-bottom:.9rem">Там ещё <?= e((string)($b['reviews2gis'] ?? '')) ?> отзыва и оценка <?= e((string)($b['rating2gis'] ?? '')) ?> из 5. 2ГИС не даёт встроить их на сайт, поэтому — по ссылке.</p>
+      <p class="muted" style="margin-bottom:.9rem">Там ещё <?= nplural((int)($b['reviews2gis'] ?? 0), ['отзыв','отзыва','отзывов']) ?> и оценка <?= e((string)($b['rating2gis'] ?? '')) ?> из 5. 2ГИС не даёт встроить их на сайт, поэтому — по ссылке.</p>
       <a class="btn btn--ghost" href="<?= e($b['gis2ReviewsUrl'] ?? '') ?>" target="_blank" rel="noopener"><?= icon('external') ?>Читать в 2ГИС</a>
     </div>
     <div class="panel">

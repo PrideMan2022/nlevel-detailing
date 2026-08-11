@@ -100,14 +100,20 @@ function json_ld(array $page, array $extra = []): string
             $b['vkUrl'] ?? '', $b['telegramUrl'] ?? '', $b['yandexMapUrl'] ?? '',
             $b['gis2Url'] ?? '', $b['zoonUrl'] ?? '',
         ])),
-        'aggregateRating' => [
+    ];
+
+    // Оценку показываем только там, где рядом действительно есть отзывы:
+    // на главной и на странице отзывов. На остальных страницах разметка
+    // без видимого подтверждения — поисковики её не засчитывают.
+    if (in_array($page['slug'] ?? '', ['index', 'reviews'], true)) {
+        $org['aggregateRating'] = [
             '@type'       => 'AggregateRating',
             'ratingValue' => rating_avg(),
             'reviewCount' => reviews_total(),
             'bestRating'  => 5,
             'worstRating' => 1,
-        ],
-    ];
+        ];
+    }
 
     $site = [
         '@context'   => 'https://schema.org',
@@ -349,8 +355,13 @@ function render_page(array $page, callable $body, array $schema = []): void
 <title><?= e($title) ?></title>
 <meta name="description" content="<?= e($desc) ?>">
 <meta name="keywords" content="<?= e($page['keywords'] ?? '') ?>">
+<?php $isError = ($page['slug'] ?? '') === '404'; ?>
+<?php if (!$isError): ?>
 <link rel="canonical" href="<?= e($canonical) ?>">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<?php else: ?>
+<meta name="robots" content="noindex, follow">
+<?php endif; ?>
 <?php if (!empty($b['yandexVerification'])): ?>
 <meta name="yandex-verification" content="<?= e($b['yandexVerification']) ?>">
 <?php endif; ?>
@@ -424,7 +435,7 @@ function render_consent(): void
 <div class="consent-bar" id="consentBar" data-metrika="<?= e($metrika) ?>" hidden>
   <div class="consent-bar__box" role="dialog" aria-modal="false" aria-labelledby="consentTitle">
     <div class="consent-bar__text">
-      <h2 id="consentTitle"><?= e($b['title'] ?? '') ?></h2>
+      <p class="consent-bar__h" id="consentTitle"><?= e($b['title'] ?? '') ?></p>
       <p><?= e($b['text'] ?? '') ?>
         <a href="<?= url('privacy') ?>"><?= e($b['more'] ?? 'Подробнее') ?></a>
       </p>

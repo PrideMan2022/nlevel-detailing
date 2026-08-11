@@ -39,7 +39,7 @@ render_page($page, function () use ($b, $gal, $heroPhotos, $cards) { ?>
 
       <div class="hero__stats">
         <div class="hero__stat"><b><?= rating_avg() ?></b><span>рейтинг на Яндекс.Картах и 2ГИС</span></div>
-        <div class="hero__stat"><b><?= reviews_total() ?></b><span>отзыва клиентов</span></div>
+        <div class="hero__stat"><b><?= reviews_total() ?></b><span><?= plural(reviews_total(), ['отзыв','отзыва','отзывов']) ?> клиентов</span></div>
         <?php
         $minPrice = PHP_INT_MAX;
         $count = 0;
@@ -62,7 +62,7 @@ render_page($page, function () use ($b, $gal, $heroPhotos, $cards) { ?>
              title="<?= e($g['cat'] ?? '') ?> — NLeveL, Екатеринбург"
              width="578" height="768" <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?> decoding="async">
         <?php if ($i === 0): ?>
-        <figcaption class="hero__badge"><?= icon('star') ?><b><?= rating_avg() ?></b> · <?= reviews_total() ?> отзыва</figcaption>
+        <figcaption class="hero__badge"><?= icon('star') ?><b><?= rating_avg() ?></b> · <?= nplural(reviews_total(), ['отзыв','отзыва','отзывов']) ?></figcaption>
         <?php endif; ?>
       </figure>
       <?php endforeach; ?>

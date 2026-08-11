@@ -2693,3 +2693,13 @@ body:has(.consent-bar:not([hidden])) .fab {
   padding: 0.4rem 0.9rem;
   font-size: 0.8rem;
 }
+
+/* Заголовок баннера согласия: раньше был H2 и лез в структуру заголовков
+   каждой страницы. Тег сменён на абзац, размер остался прежним. */
+.consent-bar__h {
+  font-size: var(--step-1);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
+  margin-bottom: 0.3rem;
+}

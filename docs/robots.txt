@@ -14,61 +14,14 @@ Disallow: /inc/
 Disallow: /data/
 Allow: /assets/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&ymclid&_openstat&from&roistat&fbclid
+
 User-agent: Yandex
 Allow: /
-Disallow: /*?
 Disallow: /app/
 Disallow: /admin/
 Disallow: /inc/
 Disallow: /data/
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&ymclid&_openstat&from&roistat&fbclid
-User-agent: Googlebot
-Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Claude-User
-Allow: /
-
-User-agent: Claude-SearchBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Perplexity-User
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: Applebot
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
-
-User-agent: YandexAdditional
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Amazonbot
-Allow: /
-
-User-agent: meta-externalagent
-Allow: /
 
 User-agent: AhrefsBot
 Disallow: /
@@ -86,4 +39,3 @@ User-agent: DataForSeoBot
 Disallow: /
 
 Sitemap: https://prideman2022.github.io/nlevel-detailing/sitemap.xml
-Host: localhost:8765
