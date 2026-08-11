@@ -21,6 +21,11 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Технический адрес хостинга не должен отдавать сайт: это его полный дубль,
+    # и поисковик может проиндексировать сайт по чужому имени
+    RewriteCond %{HTTP_HOST} \.nichost\.ru$ [NC]
+    RewriteRule ^ https://nlevel.pro%{REQUEST_URI} [R=301,L]
+
     # Только HTTPS. Включать после того, как выпущен SSL-сертификат,
     # иначе браузер упрётся в ошибку вместо сайта.
     RewriteCond %{HTTPS} !=on
@@ -31,10 +36,6 @@ ErrorDocument 404 /404.html
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-    # Технический адрес хостинга не должен отдавать сайт: это его полный дубль,
-    # и поисковик может проиндексировать сайт по чужому имени
-    RewriteCond %{HTTP_HOST} \.nichost\.ru$ [NC]
-    RewriteRule ^ https://nlevel.pro%{REQUEST_URI} [R=301,L]
 </IfModule>
 
 <IfModule mod_headers.c>
