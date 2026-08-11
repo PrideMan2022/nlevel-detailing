@@ -2391,6 +2391,10 @@ body:has(.consent-bar:not([hidden])) .fab {
 
 .reviews-widget__head .chip {
   flex-shrink: 0;
+  /* На телефоне это была цель в 30px — пальцем не попасть */
+  min-block-size: 38px;
+  display: inline-flex;
+  align-items: center;
 }
 
 @media (max-width: 32rem) {
@@ -2421,4 +2425,264 @@ body:has(.consent-bar:not([hidden])) .fab {
 .requisites b {
   color: var(--text-2);
   font-weight: 600;
+}
+
+/* ---------- 25. ВСПЛЫВАЮЩЕЕ ОКНО С ПРИЛОЖЕНИЕМ ---------- */
+.appmodal[hidden] {
+  display: none !important;
+}
+
+.appmodal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: clamp(0px, -1rem + 4vw, 1.5rem);
+}
+
+.appmodal__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 5, 6, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: appmodal-fade 0.22s var(--ease) both;
+}
+
+.appmodal__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(46rem, 100%);
+  /* На телефоне — во весь экран, на десктопе — окном */
+  block-size: min(100dvh, 46rem);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--sh-3);
+  animation: appmodal-in 0.28s var(--ease) both;
+}
+
+@media (max-width: 40rem) {
+  .appmodal__box {
+    inline-size: 100%;
+    block-size: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+}
+
+@keyframes appmodal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes appmodal-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appmodal__scrim,
+  .appmodal__box { animation: none; }
+}
+
+.appmodal__bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem 0.6rem var(--gap-sm);
+  padding-top: max(0.6rem, env(safe-area-inset-top));
+  background: var(--surface);
+  border-block-end: 1px solid var(--line-soft);
+}
+
+.appmodal__title {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+.appmodal__title svg {
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.appmodal__ext,
+.appmodal__close {
+  inline-size: 42px;
+  block-size: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.appmodal__ext:hover,
+.appmodal__close:hover {
+  color: var(--text);
+  border-color: var(--surface-3);
+}
+
+.appmodal__ext svg,
+.appmodal__close svg {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+}
+
+.appmodal__body {
+  position: relative;
+  flex: 1;
+  min-block-size: 0;
+  background: var(--bg);
+}
+
+.appmodal__body iframe {
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+  display: block;
+}
+
+.appmodal__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.9rem;
+  font-size: var(--step--1);
+  color: var(--text-3);
+}
+
+.appmodal__spinner {
+  inline-size: 2rem;
+  block-size: 2rem;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: appmodal-spin 0.8s linear infinite;
+}
+
+@keyframes appmodal-spin {
+  to { transform: rotate(1turn); }
+}
+
+/* ---------- 26. ГЛАВНОЕ ДЕЙСТВИЕ НА СТРАНИЦЕ ЗАПИСИ ---------- */
+.book-hero {
+  display: grid;
+  gap: var(--gap-sm) var(--gap-md);
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  padding: var(--gap-md);
+  background: linear-gradient(150deg, var(--surface), var(--bg-2) 70%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.book-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -70%;
+  inset-inline-start: 30%;
+  inline-size: 40rem;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.book-hero__icon {
+  inline-size: 3.4rem;
+  block-size: 3.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-lg);
+  background: var(--accent-glow);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.book-hero__icon svg {
+  inline-size: 1.7rem;
+  block-size: 1.7rem;
+}
+
+.book-hero__text h2 {
+  font-size: var(--step-2);
+  margin-bottom: 0.3rem;
+}
+
+.book-hero__text p {
+  font-size: var(--step--1);
+  color: var(--text-2);
+  max-width: 52ch;
+}
+
+.book-hero__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+
+@media (min-width: 52rem) {
+  .book-hero {
+    grid-template-columns: auto 1fr auto;
+  }
+  .book-hero__actions {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 30rem) {
+  .book-hero { grid-template-columns: 1fr; }
+  .book-hero__actions .btn { inline-size: 100%; }
+}
+
+/* Список «Другие услуги» в колонке страницы услуги: ссылки были по 24px */
+.side-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.side-links a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-block-size: 40px;
+  padding-block: 0.2rem;
+  color: var(--text-2);
+  font-size: var(--step--1);
+  transition: color 0.18s;
+}
+
+.side-links a:hover {
+  color: var(--accent);
+}
+
+.side-links svg {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  flex-shrink: 0;
+  color: var(--accent);
 }

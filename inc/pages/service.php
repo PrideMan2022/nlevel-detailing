@@ -173,9 +173,9 @@ render_page($page, function () use ($b, $page, $c, $items, $minPrice, $photos, $
 
       <div class="panel" style="margin-top:var(--gap-sm)">
         <h3 style="font-size:var(--step-1);margin-bottom:.7rem">Другие услуги</h3>
-        <ul style="list-style:none;padding:0;margin:0">
+        <ul class="side-links">
           <?php foreach (service_nav() as $s): if ($s['url'] === $slug) { continue; } ?>
-          <li style="padding:.35rem 0"><a href="<?= url($s['url']) ?>" style="color:var(--text-2);display:inline-flex;gap:.5rem;align-items:center"><?= icon($s['icon']) ?> <?= e($s['label']) ?></a></li>
+          <li><a href="<?= url($s['url']) ?>"><?= icon($s['icon']) ?><?= e($s['label']) ?></a></li>
           <?php endforeach; ?>
         </ul>
       </div>

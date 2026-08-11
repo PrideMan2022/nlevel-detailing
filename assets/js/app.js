@@ -222,73 +222,86 @@
     });
   }
 
-  /* ---------- 7b. Приложение онлайн-записи грузим по клику ---------- */
-  var appStub = $('#appStub');
-  if (appStub) {
-    var loadApp = function () {
-      var host = appStub.parentNode;
+  /* ---------- 7b. Всплывающее окно с приложением записи ---------- */
+  var modal = $('#appModal');
+  if (modal) {
+    var body = $('#appModalBody');
+    var lastFocused = null;
+    var loaded = false;
+
+    var loadApp = function (src) {
+      if (loaded) return;
+      loaded = true;
       var f = document.createElement('iframe');
-      f.src = appStub.dataset.src;
+      f.src = src;
       f.title = 'Приложение онлайн-записи в детейлинг-студию NLeveL';
       f.setAttribute('allow', 'clipboard-write; web-share');
       f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-      host.appendChild(f);
-      appStub.remove();
-
-      // Если приложение запретит фрейминг, страница останется пустой —
-      // через 4 с предлагаем открыть в новой вкладке
-      setTimeout(function () {
-        var doc = null;
-        try { doc = f.contentDocument; } catch (e) { /* кросс-домен — значит загрузилось */ }
-        if (doc && doc.body && doc.body.innerHTML.trim() === '') {
-          var note = document.createElement('div');
-          note.className = 'appframe__stub';
-          note.innerHTML =
-            '<h3>Приложение не открылось во фрейме</h3>' +
-            '<p>Откройте его в отдельной вкладке — там всё работает как обычно.</p>' +
-            '<a class="btn btn--primary btn--lg" href="' + appStub.dataset.src + '" target="_blank" rel="noopener">Открыть приложение</a>';
-          host.appendChild(note);
-        }
-      }, 4000);
+      f.addEventListener('load', function () {
+        var l = $('.appmodal__loading', body);
+        if (l) l.remove();
+      });
+      body.appendChild(f);
     };
-    appStub.addEventListener('click', loadApp);
-    appStub.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadApp(); }
+
+    var openModal = function (src) {
+      lastFocused = document.activeElement;
+      modal.hidden = false;
+      document.documentElement.style.overflow = 'hidden';
+      loadApp(src);
+      var close = $('.appmodal__close', modal);
+      if (close) close.focus();
+    };
+
+    var closeModal = function () {
+      modal.hidden = true;
+      document.documentElement.style.overflow = '';
+      if (lastFocused) lastFocused.focus();
+    };
+
+    $$('[data-appopen], #openApp').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        // Режим «окно»: открываем приложение на его собственном домене
+        // отдельным окном. Только так работает вход через Telegram —
+        // у бота в BotFather прописан один домен, и это домен приложения.
+        if (btn.dataset.mode === 'window') {
+          var url = btn.dataset.window || btn.dataset.src;
+          var w = Math.min(480, screen.availWidth);
+          var h = Math.min(860, screen.availHeight - 60);
+          var left = Math.round((screen.availWidth - w) / 2);
+          var top = Math.round((screen.availHeight - h) / 2);
+          var win = window.open(url, 'nlevel-booking',
+            'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
+            ',menubar=no,toolbar=no,location=yes,resizable=yes,scrollbars=yes');
+          // Блокировщик всплывающих окон — уводим обычной вкладкой
+          if (!win || win.closed) { window.open(url, '_blank', 'noopener'); }
+          else { win.focus(); }
+          return;
+        }
+        openModal(btn.dataset.src || btn.getAttribute('href'));
+      });
     });
 
-    // Приложение подгружается само, как только окно попадает в поле зрения:
-    // клик не нужен, никуда не перекидывает. Сборка тяжёлая, поэтому
-    // не тянем её тем, кто до этого блока не долистал.
-    var appLoaded = false;
-    var loadAppOnce = function () {
-      if (appLoaded) return;
-      appLoaded = true;
-      loadApp();
-    };
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-appclose]')) closeModal();
+    });
 
-    if ('IntersectionObserver' in window) {
-      var appIo = new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting) {
-          appIo.disconnect();
-          loadAppOnce();
-        }
-      }, { rootMargin: '200px' });
-      appIo.observe(appStub);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
 
-      // Подстраховка: в фоновой вкладке наблюдатели молчат, и человек,
-      // вернувшись, увидел бы пустую заглушку. Грузим сами, когда
-      // страница становится видимой и окно уже на нужном месте.
-      var appFallback = function () {
-        if (document.visibilityState !== 'visible') return;
-        var r = appStub.getBoundingClientRect();
-        if (r.top < window.innerHeight + 200 && r.bottom > -200) loadAppOnce();
-      };
-      document.addEventListener('visibilitychange', appFallback);
-      window.addEventListener('scroll', appFallback, { passive: true });
-      setTimeout(appFallback, 1200);
-    } else {
-      loadAppOnce();
-    }
+    // Пока окно открыто, фокус не должен убегать на страницу под ним
+    modal.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var items = $$('a[href], button, iframe', modal).filter(function (el) {
+        return !el.hasAttribute('hidden');
+      });
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
   }
 
   /* ---------- 8. Маска телефона ---------- */

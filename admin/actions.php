@@ -229,7 +229,7 @@ function handle_action(): array
                         foreach ([
                             'name', 'city', 'district', 'street', 'addressNote', 'region',
                             'phone', 'phoneRaw', 'whatsapp', 'whatsappUrl', 'telegram', 'telegramUrl',
-                            'vkUrl', 'appUrl', 'hours', 'yandexMapUrl', 'yandexRouteUrl',
+                            'vkUrl', 'appUrl', 'appMode', 'hours', 'yandexMapUrl', 'yandexRouteUrl',
                             'gis2Url', 'gis2ReviewsUrl', 'zoonUrl',
                         ] as $k) {
                             if (isset($_POST[$k])) {

@@ -404,6 +404,7 @@ function render_page(array $page, callable $body, array $schema = []): void
 <?php render_tabbar($page); ?>
 <?php render_fab(); ?>
 <?php render_consent(); ?>
+<?php render_app_modal(); ?>
 <script src="<?= asset_v('assets/js/app.js') ?>" defer></script>
 </body>
 </html>
@@ -460,6 +461,37 @@ function render_requisites(): void
   <b>Режим работы:</b> <?= e($b['hours'] ?? '') ?>.
   <b>Телефон:</b> <a href="tel:<?= e($b['phoneRaw'] ?? '') ?>"><?= e($b['phone'] ?? '') ?></a><?php if (!empty($op['email'])): ?>.
   <b>Почта:</b> <a href="mailto:<?= e($op['email']) ?>"><?= e($op['email']) ?></a><?php endif; ?>.
+</div>
+    <?php
+}
+
+/**
+ * Всплывающее окно с приложением записи.
+ * Разметка есть на каждой странице, но приложение внутрь подгружается
+ * только когда окно открывают — иначе страница тянула бы его зря.
+ */
+function render_app_modal(): void
+{
+    $b = biz();
+    ?>
+<div class="appmodal" id="appModal" hidden role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+  <div class="appmodal__scrim" data-appclose></div>
+  <div class="appmodal__box">
+    <div class="appmodal__bar">
+      <span class="appmodal__title" id="appModalTitle"><?= icon('calendar') ?>Онлайн-запись NLeveL</span>
+      <a class="appmodal__ext" href="<?= e($b['appUrl'] ?? '') ?>" target="_blank" rel="noopener"
+         aria-label="Открыть приложение в новой вкладке"><?= icon('external') ?></a>
+      <button class="appmodal__close" type="button" data-appclose aria-label="Закрыть">
+        <?= icon('close') ?>
+      </button>
+    </div>
+    <div class="appmodal__body" id="appModalBody">
+      <div class="appmodal__loading">
+        <span class="appmodal__spinner" aria-hidden="true"></span>
+        Загружаем приложение…
+      </div>
+    </div>
+  </div>
 </div>
     <?php
 }

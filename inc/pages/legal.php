@@ -89,9 +89,9 @@ render_page($page, function () use ($doc, $op, $updated, $operatorLine, $fill) {
     <aside class="sticky-aside">
       <div class="panel">
         <h3 style="font-size:var(--step-1);margin-bottom:.7rem">Все документы</h3>
-        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:.2rem">
+        <ul class="side-links">
           <?php foreach (content()['legal']['docs'] ?? [] as $d): ?>
-          <li><a href="<?= url($d['slug']) ?>" style="display:block;padding:.5rem 0;color:<?= ($d['slug'] ?? '') === ($doc['slug'] ?? '') ? 'var(--accent)' : 'var(--text-2)' ?>"><?= e($d['nav'] ?? $d['title']) ?></a></li>
+          <li><a href="<?= url($d['slug']) ?>"<?= ($d['slug'] ?? '') === ($doc['slug'] ?? '') ? ' style="color:var(--accent)"' : '' ?>><?= e($d['nav'] ?? $d['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
       </div>
