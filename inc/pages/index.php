@@ -156,7 +156,28 @@ render_page($page, function () use ($b, $gal, $heroPhotos, $cards) { ?>
     </div>
     <a class="btn btn--ghost" href="<?= url('works') ?>">Все работы</a>
   </div>
-  <?php block_gallery(array_slice($gal, 0, 8)); ?>
+  <?php
+  /* По одному снимку из каждой услуги, потом добираем до восьми. Иначе
+     в превью попадает подряд одна услуга — галерея хранится по разделам. */
+  $seen = [];
+  $mix = [];
+  foreach ($gal as $g) {
+      $c = $g['cat'] ?? '';
+      if (!isset($seen[$c])) {
+          $seen[$c] = true;
+          $mix[] = $g;
+      }
+  }
+  foreach ($gal as $g) {
+      if (count($mix) >= 8) {
+          break;
+      }
+      if (!in_array($g, $mix, true)) {
+          $mix[] = $g;
+      }
+  }
+  block_gallery(array_slice($mix, 0, 8));
+  ?>
 </section>
 
 <section class="section shell">

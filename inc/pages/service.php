@@ -37,27 +37,32 @@ if ($minPrice === PHP_INT_MAX) {
     $minPrice = 0;
 }
 
-/* Фото для галереи внизу: профильные, добираем видами студии */
+/* Фото внизу страницы. Первая категория в списке — своя, остальные идут
+   добором, если своих снимков не набралось на ряд. Порядок важен: сначала
+   показываем работу по этой услуге и только потом что-то смежное. */
 $want = [
     'oklejka-plenkoj'        => ['Оклейка'],
-    'antigraviynaya-plenka'  => ['Оклейка'],
-    'tonirovka'              => ['Оклейка', 'Детали'],
-    'mojka'                  => ['Мойка'],
-    'polirovka'              => ['Детали', 'Оклейка'],
-    'keramika'               => ['Оклейка', 'Мойка'],
-    'himchistka'             => ['Мойка'],
-    'shumoizolyaciya'        => ['Детали'],
+    'antigraviynaya-plenka'  => ['Керамика', 'Полировка', 'Оклейка'],
+    'tonirovka'              => ['Тонировка', 'Оклейка'],
+    'mojka'                  => ['Полировка', 'Керамика'],
+    'polirovka'              => ['Полировка', 'Керамика'],
+    'keramika'               => ['Керамика', 'Полировка'],
+    'himchistka'             => ['Химчистка', 'Шумоизоляция'],
+    'shumoizolyaciya'        => ['Шумоизоляция'],
 ][$slug] ?? [];
-$primary = [];
-$filler = [];
+$byCat = [];
 foreach (gallery() as $g) {
-    if (in_array($g['cat'] ?? '', $want, true)) {
-        $primary[] = $g;
-    } elseif (($g['cat'] ?? '') === 'Студия') {
-        $filler[] = $g;
+    $byCat[$g['cat'] ?? ''][] = $g;
+}
+$photos = [];
+foreach ($want as $cat) {
+    foreach ($byCat[$cat] ?? [] as $g) {
+        $photos[] = $g;
+        if (count($photos) >= 6) {
+            break 2;
+        }
     }
 }
-$photos = array_slice(array_merge($primary, $filler), 0, 6);
 
 /* Релевантный FAQ */
 $relFaq = [];
@@ -81,7 +86,8 @@ if (!$relFaq) {
 
 $heroSrc = !empty($page['hero']) ? service_img($page['hero']) : null;
 if (!$heroSrc) {
-    $heroSrc = gallery_img('work-8');
+    // Обложка не задана — берём первый профильный снимок, а не жёстко зашитый файл
+    $heroSrc = gallery_img($photos[0]['f'] ?? '');
 }
 
 $schema = [
