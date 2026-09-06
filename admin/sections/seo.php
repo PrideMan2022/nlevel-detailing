@@ -11,6 +11,15 @@ a_form_open('seo');
   <?php a_text('googleVerification', 'Код Google Search Console', $b['googleVerification'] ?? ''); ?>
 </div>
 
+<?php a_group('IndexNow', 'После каждого сохранения сайт сам сообщает Яндексу и Bing, что страницы изменились — не дожидаясь, пока робот заглянет сам. Ручной переобход в Вебмастере при этом не нужен.'); ?>
+<p class="a-muted">Состояние: <?= e(indexnow_status_text()) ?></p>
+<?php $inKey = trim((string)($c['seoFiles']['indexnowKey'] ?? '')); ?>
+<?php if ($inKey !== ''): ?>
+<p class="a-muted">Файл подтверждения: <code><?= e(site_url() . '/' . $inKey . '.txt') ?></code> — он должен открываться, иначе поисковик отклонит уведомления.</p>
+<?php else: ?>
+<p class="a-muted">Ключ не задан — уведомления не отправляются.</p>
+<?php endif; ?>
+
 <?php a_group('Страницы', 'Заголовок — до 60 знаков, описание — до 160. Дальше поисковик обрежет.'); ?>
 <?php foreach (all_pages() as $i => $p): ?>
 <div class="a-card">

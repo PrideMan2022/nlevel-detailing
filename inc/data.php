@@ -6,6 +6,8 @@
  */
 declare(strict_types=1);
 
+require_once __DIR__ . '/indexnow.php';
+
 /** Весь контент сайта. Читается один раз за запрос. */
 function content(): array
 {
@@ -55,6 +57,11 @@ function save_content(array $data): bool
         @unlink($tmp);
         return false;
     }
+
+    // Контент на диске — можно звать поисковиков. Строго после записи:
+    // иначе робот придёт на страницу раньше, чем правка до неё доедет.
+    indexnow_notify($data);
+
     return true;
 }
 
