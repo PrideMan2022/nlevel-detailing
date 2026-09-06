@@ -11,7 +11,10 @@
    — не кэширует POST-запросы и любые адреса с параметрами.
    ========================================================================== */
 
-const VERSION = 'nlevel-v1';
+/* Версию поднимаем при любой замене картинок под теми же именами: фотографии
+   кэшируются «сначала кэш» и сами по себе не перепроверяются никогда, так что
+   иначе посетитель со старым кэшем останется со старой галереей навсегда. */
+const VERSION = 'nlevel-v3';
 const SHELL = VERSION + '-shell';   // стили, скрипты, иконки — редко меняются
 const PAGES = VERSION + '-pages';   // HTML страниц
 const MEDIA = VERSION + '-media';   // фотографии
@@ -96,16 +99,25 @@ self.addEventListener('fetch', (e) => {
   }
 
   /* Страницы: сначала пробуем сеть — цены должны быть свежими.
-     Нет связи — отдаём последнюю сохранённую копию. */
+     Нет связи — отдаём последнюю сохранённую копию.
+
+     Между попыткой и запасным вариантом есть ВТОРАЯ попытка, и это не
+     перестраховка: сервер хостинга обрывает примерно каждый третий запрос.
+     Без повтора владелец правит цену в админке, обновляет сайт, попадает
+     на оборванный запрос и видит старую страницу из кэша — выглядит так,
+     будто правка не сохранилась. */
   if (req.mode === 'navigate' || dest === 'document') {
+    const fromNetwork = () => fetch(req).then((res) => {
+      if (res.ok) {
+        const copy = res.clone();
+        caches.open(PAGES).then((c) => c.put(req, copy));
+      }
+      return res;
+    });
     e.respondWith(
-      fetch(req).then((res) => {
-        if (res.ok) {
-          const copy = res.clone();
-          caches.open(PAGES).then((c) => c.put(req, copy));
-        }
-        return res;
-      }).catch(() => caches.match(req).then((hit) => hit || caches.match(scopePath)))
+      fromNetwork()
+        .catch(() => fromNetwork())
+        .catch(() => caches.match(req).then((hit) => hit || caches.match(scopePath)))
     );
   }
 });
