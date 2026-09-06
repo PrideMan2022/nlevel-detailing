@@ -1,9 +1,29 @@
-# Здесь лежат только картинки. Выполнение любых скриптов запрещено.
-php_flag engine off
+# Здесь лежат только картинки, загруженные через админку.
+# Выполнение любых скриптов запрещено — это главный способ превратить
+# форму загрузки фотографий в дыру.
+
+# php_flag понимает только PHP, собранный модулем Apache. Если PHP работает
+# как CGI/FastCGI, эта строка без обёртки роняет каталог в 500.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine Off
 </IfModule>
+
 <FilesMatch "\.(php|phtml|php[0-9]|phar|cgi|pl|py|sh|htaccess)$">
-    Require all denied
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
+
+# Даже если исполнение как-то включат обратно, файл уедет посетителю текстом
 AddType text/plain .php .phtml .php5 .php7 .php8 .phar

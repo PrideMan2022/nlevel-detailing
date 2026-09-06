@@ -1,2 +1,9 @@
-Require all denied
-Deny from all
+# Шаблоны и служебный код подключаются только изнутри, напрямую — никогда.
+# Про две версии синтаксиса см. комментарий в data/.htaccess.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

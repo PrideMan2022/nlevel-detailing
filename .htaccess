@@ -7,6 +7,11 @@ AddDefaultCharset UTF-8
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Технический адрес хостинга не должен отдавать сайт: это его полный дубль,
+    # и поисковик может проиндексировать сайт по чужому имени
+    RewriteCond %{HTTP_HOST} \.nichost\.ru$ [NC]
+    RewriteRule ^ https://nlevel.pro%{REQUEST_URI} [R=301,L]
+
     # HTTPS обязателен: без него Яндекс понижает, а браузер пишет «не защищено».
     # Строку можно убрать, если хостинг сам заворачивает на HTTPS.
     RewriteCond %{HTTPS} !=on
@@ -34,14 +39,32 @@ AddDefaultCharset UTF-8
     RewriteRule ^(data|inc|build|docs)/ - [F,L]
 </IfModule>
 
+# Синтаксис запрета разный у Apache 2.4 и 2.2, а какая версия у хостинга —
+# заранее не известно. Голый `Require` на 2.2 роняет весь сайт в 500, поэтому
+# оба варианта завёрнуты в свои <IfModule>: сработает ровно один.
 <FilesMatch "\.(json|md|sh|log)$">
-    Require all denied
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # content.json отдаётся только через PHP, напрямую — нет
 <Files "content.json">
-    Require all denied
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </Files>
+
+# Листинг каталогов запрещён: иначе по /assets/img/ виден весь архив
+Options -Indexes
 
 # ---------- Заголовки безопасности ----------
 <IfModule mod_headers.c>

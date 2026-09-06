@@ -1,2 +1,10 @@
-Require all denied
-Deny from all
+# Каталог с контентом наружу не отдаётся ни при какой версии Apache.
+# Директивы разведены по <IfModule>: на 2.4 сработает первый блок, на 2.2 —
+# второй. Если написать оба подряд без обёртки, лишний уронит каталог в 500.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
